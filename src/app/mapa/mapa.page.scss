@@ -1,0 +1,60 @@
+#map {
+  height: 100%;
+}
+
+#container {
+  text-align: center;
+
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+#container strong {
+  font-size: 20px;
+  line-height: 26px;
+}
+
+#container p {
+  font-size: 16px;
+  line-height: 22px;
+
+  color: #000000;
+
+  margin: 0;
+}
+
+#container a {
+  text-decoration: none;
+}
+
+ion-content ion-toolbar {
+  --background: translucent;
+}
+
+.colorText{
+  color: black;
+}
+.round {
+  --width: 60px;
+  --height: 60px;
+  --border-radius: 50%;
+  --vertical-align: middle;
+  --padding-start: 10px;
+  --padding-end: 10px;
+}
+.buttonP {
+  margin-top: 20px;
+  background-color: #4CAF50; /* Green */
+  border: none;
+  color: white;
+  padding: 20px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  cursor: pointer;
+}

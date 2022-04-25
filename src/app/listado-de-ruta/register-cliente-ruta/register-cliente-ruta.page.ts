@@ -1,0 +1,170 @@
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { IonContent, IonInfiniteScroll, Platform, IonSlides } from '@ionic/angular';
+import { Observable } from 'rxjs';
+import { DataService } from 'src/app/services/data.service';
+
+
+@Component({
+  selector: 'app-register-cliente-ruta',
+  templateUrl: './register-cliente-ruta.page.html',
+  styleUrls: ['./register-cliente-ruta.page.scss'],
+})
+export class RegisterClienteRutaPage implements OnInit, OnDestroy {
+  @ViewChild('picSlider',  {static: false}) viewer: IonSlides;
+  @ViewChild(IonInfiniteScroll) infiniteScroll: IonInfiniteScroll;
+  @ViewChild(IonContent) content: IonContent;
+  backToTop = false;
+  titulo = '';
+  results = [];
+  searchTerm = '';
+  default= '';
+  pagination=1;
+  maxElement=15;
+  idVendedor=this.sqlservices.getCodVend();
+  codigoRuta='';
+
+  departamento = [
+  ];
+  constructor(private platform: Platform,  public sqlservices: DataService, public router: Router, private route: ActivatedRoute ) {
+    this.route.queryParams.subscribe((params) => {
+      console.log(params); // { codRuta: "price" }
+      this.codigoRuta = params.codigo;
+      console.log(this.codigoRuta); // price
+    });
+}
+
+  ngOnInit() {
+    this.results = [];
+    const jsonDv = {
+      codVend : this.sqlservices.getCodVend(),
+      posi : this.pagination,
+    cantidadMostra : this.maxElement,
+    busqueda : this.searchTerm
+    };
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    this.sqlservices.getListadoCliente(jsonDv).subscribe( (Data: any)=>{
+      console.log(Data);
+      console.log(Data.objeto);
+
+// if(Data.resultado === 1){
+  Data.objeto.forEach(element => {
+    this.results.push(element);
+  });
+
+});
+
+
+  }
+
+
+  getScrollPos(pos: number) {
+    if (pos > this.platform.height()) {
+         this.backToTop = true;
+    } else {
+         this.backToTop = false;
+    }
+}
+  ngOnDestroy(): void {
+    this.results = [];
+  }
+  gotToTop() {
+    this.content.scrollToTop(1000);
+  }
+
+  searchChanged() {
+    this.pagination =1;
+    let totalData = 0;
+    const jsonDv = {
+      codVend: this.idVendedor,
+      posi: this.pagination,
+    cantidadMostra: this.maxElement,
+    busqueda: this.searchTerm
+    };
+
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    this.sqlservices.getListadoCliente(jsonDv).subscribe((Data: any)=>{
+      this.results = [];
+      console.log(Data);
+      console.log(Data.objeto);
+
+// if(Data.resultado === 1){
+  Data.objeto.forEach(element => {
+    this.results.push(element);
+  });
+
+  totalData = Data.objeto.length;
+  if (totalData === 0 || totalData < this.maxElement) {
+    this.infiniteScroll.disabled = true;
+  }else{
+    this.infiniteScroll.disabled = false;
+  }
+});
+
+
+    console.log('Done');
+    // Call our service function which returns an Observable
+    // this.results = this.movieService.searchData(this.searchTerm, this.type);
+  }
+  detailsCliente(codi: string){
+    this.router.navigate(['/listado-de-cliente/cliente'], { queryParams: { codigo: codi } });
+  }
+  addCliente(codi: string){
+
+    const jsonDv = {
+      codRuta: parseInt(this.codigoRuta,10),
+      codCli: parseInt(codi,10)
+    };
+
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    this.sqlservices.setAddRutaCliente(jsonDv).subscribe((Data: any)=>{
+      console.log(Data);
+      console.log('vend:' +this.sqlservices.getCodVend());
+      this.router.navigate(['/listado-de-ruta/ruta'],{
+        queryParams: { codigo: this.codigoRuta },
+      });
+});
+  }
+  loadData(event) {
+    this.pagination+=1;
+    let totalData = 0;
+    setTimeout(async () => {
+      const jsonDv = {
+        codVend: this.idVendedor,
+        posi: this.pagination,
+      cantidadMostra: this.maxElement,
+      busqueda: this.searchTerm
+      };
+
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      this.sqlservices.getListadoCliente(jsonDv).subscribe((Data: any)=>{
+        console.log(Data);
+        console.log(Data.objeto);
+
+  // if(Data.resultado === 1){
+    Data.objeto.forEach(element => {
+      this.results.push(element);
+    });
+
+    totalData = Data.objeto.length;
+    if (totalData === 0 || totalData < this.maxElement) {
+      event.target.disabled = true;
+    }else{
+      event.target.disabled = false;
+    }
+  });
+
+
+      console.log('Done');
+      event.target.complete();
+
+      // App logic to determine if all data is loaded
+      // and disable the infinite scroll
+
+    }, 500);
+  }
+
+  toggleInfiniteScroll() {
+    this.infiniteScroll.disabled = !this.infiniteScroll.disabled;
+  }
+}

@@ -1,0 +1,21 @@
+.info-img {
+  max-height: 30vh;
+  object-fit: contain;
+  padding: 10px;
+}
+.back-to-top-btn {
+  background: #000000;
+  position: fixed;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  left: 90%;
+  transform: translateX(-50%);
+  bottom: 65px;
+  z-index: 999;
+}

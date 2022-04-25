@@ -1,0 +1,45 @@
+<ion-header  [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button icon="chevron-back" defaultHref="/listado-de-ruta"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Registrar Ruta</ion-title>
+  </ion-toolbar>
+</ion-header>
+<ion-content>
+
+  <form [formGroup]="registrationForm" (ngSubmit)="submit()">
+    <ion-list>
+      <ion-item>
+        <ion-label position="floating">Descripcion</ion-label>
+        <ion-input formControlName="descripcion" autocapitalize inputmode="text"></ion-input>
+      </ion-item>
+      <div *ngFor="let error of errorMessager.descripcion">
+        <ng-container *ngIf="descripcion.hasError(error.type) && (descripcion.dirty || descripcion.touched)">
+          <small class="error-message">{{error.message}}</small>
+        </ng-container>
+      </div>
+      <ion-item>
+        <ion-label>
+          Día de la Ruta
+        </ion-label>
+
+        <ion-select formControlName="dia" [(ngModel)]="default" (ionChange)="searchChanged()"  >
+          <ion-select-option *ngFor="let item of listaDia " [value]="item.valor">{{item.nombre}}</ion-select-option>
+        </ion-select>
+        <div *ngFor="let error of errorMessager.dia">
+          <ng-container *ngIf=" default !== '' && activar">
+            <small class="error-message">{{error.message}}</small>
+          </ng-container>
+        </div>
+      </ion-item>
+      <br>
+      <br>
+      <ion-button type="submit" color="success" expand="block">
+        Guardar
+        <ion-icon slot="end" name="create"></ion-icon>
+      </ion-button>
+    </ion-list>
+  </form>
+
+</ion-content>
