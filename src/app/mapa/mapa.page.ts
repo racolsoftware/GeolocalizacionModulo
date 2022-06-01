@@ -6,6 +6,7 @@ import { ubicacion } from '../instancia/ubicacion.models';
 import { DataService } from '../services/data.service';
 import { Geolocation } from '@ionic-native/geolocation/ngx';
 import { AlertController } from '@ionic/angular';
+import { AppComponent } from '../app.component';
 
 declare let google: any;
 
@@ -21,9 +22,14 @@ export class MapaPage {
   infoWindow: any;
   labels = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
   labelIndex = 0;
-  miUbiEnElMap: any;
-  latitud: any;
-  longitud: any;
+  public static miUbiEnElMap: any;
+  public static latitud: any;
+  public static longitud: any;
+
+  circleRound: any;
+  countRadius= 0;
+  accion: string;
+  codigo: '';
 
 
 
@@ -33,38 +39,53 @@ export class MapaPage {
         title: 'National Art Gallery',
         latitude: '-17.824991',
         longitude: '31.049295',
+        visito: false,
+        codigo: 0
     },
     {
         title: 'West End Hospital',
         latitude: '-17.820987',
         longitude: '31.039682',
+        visito: false,
+        codigo: 0
     },
     {
         title: 'Dominican Convent School',
         latitude: '-17.822647',
         longitude: '31.052042',
+        visito: false,
+        codigo: 0
     },
     {
         title: 'Chop Chop Brazilian Steakhouse',
         latitude: '-17.819460',
         longitude: '31.053844',
+        visito: false,
+        codigo: 0
     },
     {
         title: 'Canadian Embassy',
         latitude: '-17.820972',
         longitude: '31.043587',
+        visito: false,
+        codigo: 0
     },
     {
         title: 'RD',
         latitude: '19.453591',
         longitude: '-70.658814',
+        visito: false,
+        codigo: 0
     },
     {
       title: 'RD1',
       latitude: '19.453591',
       longitude: '-70.659819',
+      visito: false,
+      codigo: 0
   }
   ];
+  markersMap = [];
 
   constructor(private geolocation: Geolocation,
     public sqlservices: DataService,
@@ -72,22 +93,139 @@ export class MapaPage {
     public alertController: AlertController,
     private route: ActivatedRoute) {
 
-    }
-//construye el mapa cuando inicia la app
-  ionViewDidEnter() {
-    this.route.queryParams
-    .subscribe(params => {
-      console.log(params); // { orderby: "price" }
-      const aux = params.ubicaciones;
-      if(aux!==undefined){
-        console.log(aux);
-        this.markers=aux;
-      }else{
-      }
 
     }
-  );
-    this.showMap();
+    async reloadRutaClienteVisitarHoyCXC(jsonDv: any) {
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      await this.sqlservices.getClienteAVisitarHoyCXC(jsonDv).subscribe((Data: any) => {
+        console.log(Data);
+        console.log(Data.objeto);
+        this.markers = [];
+        let cont = 0;
+
+
+        Data.objeto.forEach((element) => {
+          if (element.latidude === null || element.latitude ==='') {
+
+          }else{
+            let aux = {
+              title: element.RazonSocial,
+              latitude: element.latitude,
+              longitude: element.longitude,
+              visito: false,
+              codigo: parseInt(element.Codigo,10),
+            };
+            if(element.Visito !== '0'){
+              cont+=1;
+              aux.visito = true;
+            }
+            this.markers.push(aux);
+          }
+        });
+        console.log('compa: '+cont);
+        this.showMap2();
+      });
+    }
+    async reloadRutaCliente(jsonDv: any) {
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      await this.sqlservices.getListadoClienteRuta(jsonDv).subscribe((Data: any) => {
+        console.log(Data);
+        console.log(Data.objeto);
+        this.markers = [];
+
+
+        Data.objeto.clientes.forEach((element) => {
+          if (element.latitude !== null) {
+            let aux = false;
+            if(element.Visito === '1'){
+
+              aux = true;
+            }
+            this.markers.push({
+              title: element.RazonSocial,
+              latitude: element.latitude,
+              longitude: element.longitude,
+              visito: aux,
+              codigo: parseInt(element.Codigo)
+            });
+
+          }
+        });
+        this.showMap2();
+      });
+    }
+//construye el mapa cuando inicia la app
+  ionViewWillEnter() {
+    AppComponent.startLoading();
+  //   this.route.queryParams
+  //   .subscribe(params => {
+  //     console.log(params); // { orderby: "price" }
+  //     const aux = params.ubicaciones;
+  //     if(aux!==undefined){
+  //       console.log(aux);
+  //       this.markers=aux;
+  //     }else{
+  //     }
+
+  //   }
+  // );
+  this.route.queryParams.subscribe((params) => {
+    console.log(params); // { codRuta: "price" }
+    this.accion = params.accion;
+    this.codigo = params.codigo;
+    switch (this.accion) {
+      case 'ruta':
+        const jsonDv = {
+          codVend: '1',
+          codRuta: parseInt(this.codigo, 10),
+        };
+        this.reloadRutaCliente(jsonDv);
+
+        break;
+        case 'rutaAsig':
+          const jsonDv2 = {
+            codVend: '1',
+            codRuta: parseInt(this.codigo, 10),
+          };
+          this.reloadRutaClienteCXC(jsonDv2);
+
+          break;
+      default:
+        const jsonDv1 = {
+          codVend: '1'
+        };
+        this.reloadRutaClienteVisitarHoyCXC(jsonDv1);
+        break;
+    }
+    AppComponent.stopLoading();
+  });
+
+  }
+
+  reloadRutaClienteCXC(jsonDv: any){
+    this.sqlservices.getListadoClientecxcRuta(jsonDv).subscribe((Data: any) => {
+      console.log(Data);
+      console.log(Data.objeto);
+      this.markers = [];
+
+      Data.objeto.clientes.forEach((element) => {
+        if (element.latitud_cli !== null) {
+          let aux = false;
+            if(element.Visito === '1'){
+
+              aux = true;
+            }
+          this.markers.push({
+            title: element.RazonSocial,
+            latitude: element.latitud_cli,
+            longitude: element.longitud_cli,
+            visito: aux,
+            codigo: parseInt(element.Codigo)
+          });
+        }
+      });
+      this.showMap2();
+    });
   }
 
   svgCheckVisited(){
@@ -113,10 +251,11 @@ export class MapaPage {
       strokeWeight: 0,
       rotation: 0,
       scale:0.2,
+      // url: '/assets/img/location-on-svgrepo-com.svg',
 
-      size: new google.maps.Size(1, 1),
+      size: new google.maps.Size(0, 32),
    scaledSize: new google.maps.Size(1, 1),
-   anchor: new google.maps.Point(1, 1)
+   origin: new google.maps.Point(0, 0)
     };
     return svgMarker;
   }
@@ -138,8 +277,14 @@ export class MapaPage {
     return svgMarker;
   }
 
-
+  setMapOnAll(map: any | null) {
+    // eslint-disable-next-line @typescript-eslint/prefer-for-of
+    for (let i = 0; i < this.markersMap.length; i++) {
+      this.markersMap[i].setMap(map);
+    }
+  }
   addMarkersToMap(markers) {
+    this.setMapOnAll(null);
     console.log(this.generateRoute(markers));
     const svgMarker = this.svgMyLocation();
     const shape = {
@@ -160,8 +305,9 @@ export class MapaPage {
           longitude: marker.longitude,
           label: this.labels[this.labelIndex++ % this.labels.length],
           icon: this.svgMyLocation(),
+          idCliente: marker.codigo,
         });
-      }else if(marker.title === 'RD1'){
+      }else if(marker.visito === true){
         posi = 2;
           mapMarker = new google.maps.Marker({
           position: position,
@@ -171,6 +317,7 @@ export class MapaPage {
           longitude: marker.longitude,
           label: this.labels[this.labelIndex++ % this.labels.length],
           icon: this.svgCheckVisited(),
+          idCliente: marker.codigo,
         });
       }else{
         mapMarker = new google.maps.Marker({
@@ -181,16 +328,45 @@ export class MapaPage {
           longitude: marker.longitude,
           label: this.labels[this.labelIndex++ % this.labels.length],
           icon: this.svgPoint(),
+          idCliente: marker.codigo,
         });
       }
 
 
       mapMarker.setMap(this.map);
       this.addInfoWindowToMarker(mapMarker,posi);
+      this.markersMap.push(mapMarker);
     }
   }
 
 
+  loadCircleRound(pos){
+    const json = localStorage.getItem('ubication');
+    const conv = JSON.parse(json);
+    const auxil = {
+      lat: conv.latitude,
+      lng: conv.longitude
+    };
+    const position1 = new google.maps.LatLng(auxil.lat, auxil.lng);
+    if(this.circleRound !== undefined){
+      this.countRadius+=1;
+      this.circleRound.setCenter(position1);
+      this.circleRound.setRadius(8*(1.5+Math.sin(this.countRadius*(Math.PI/56))));
+    }else{
+      this.circleRound = new google.maps.Circle({
+      strokeColor: '#477CE0',
+      strokeOpacity: 0.8,
+      strokeWeight: 0,
+      fillColor: '#477CE0',
+      fillOpacity: 0.1
+    });
+    this.circleRound.setRadius(8*(1.5+Math.sin(this.countRadius*(Math.PI/56))));
+    this.circleRound.setMap(this.map);
+    this.circleRound.setCenter(position1);
+    }
+
+
+  }
   openMap(url: string){
 
 
@@ -218,17 +394,19 @@ export class MapaPage {
         case 2:
           infoWindowContent = '<div id="content">' +
                                 '<h2 id="firstHeading" class"firstHeading" style="color: black;">' + marker.title + '</h2>' +
+                                '<h6 id="firstHeading" class"firstHeading" style="color: black;">Codigo: ' + marker.idCliente + '</h6>' +
                                 '<p style="color: black;">Latitude: ' + marker.latitude + '</p>' +
                                 '<p style="color: black;">Longitude: ' + marker.longitude + '</p>' +
-                                '<ion-button id="navigate">Navigate</ion-button>' +
+                                '<ion-button id="navigate">Navegar</ion-button>' +
                               '</div>';
           break;
       default:
         infoWindowContent = '<div id="content">' +
                               '<h2 id="firstHeading" class"firstHeading" style="color: black;">' + marker.title + '</h2>' +
+                              '<h6 id="firstHeading" class"firstHeading" style="color: black;">Codigo: ' + marker.idCliente + '</h6>' +
                               '<p style="color: black;">Latitude: ' + marker.latitude + '</p>' +
                               '<p style="color: black;">Longitude: ' + marker.longitude + '</p>' +
-                              '<ion-button id="navigate">Navigate</ion-button>' +
+                              '<ion-button id="navigate">Navegar</ion-button>' +
                               '<ion-button id="visito">Visitado</ion-button>' +
                             '</div>';
         break;
@@ -248,14 +426,25 @@ export class MapaPage {
           console.log('navigate button clicked!');
           // code to navigate using google maps app
           // eslint-disable-next-line max-len
-          this.openMap('https://www.google.com/maps/dir/?api=1&destination=' + marker.latitude + ',' + marker.longitude+'&waypoints=19.4522879,-70.6553089%7C19.451831,-70.654702');
+          this.openMap('https://www.google.com/maps/dir/?api=1&destination=' + marker.latitude + ',' + marker.longitude);
+          // eslint-disable-next-line max-len
+          // this.openMap('https://www.google.com/maps/dir/?api=1&destination=' + marker.latitude + ',' + marker.longitude+'&waypoints=19.4522879,-70.6553089%7C19.451831,-70.654702');
           // eslint-disable-next-line max-len
           // window.open('https://www.google.com/maps/dir/?api=1&destination=' + marker.latitude + ',' + marker.longitude+'&waypoints=19.4522879,-70.6553089%7C19.451831,-70.654702');
         });
         try {
           document.getElementById('visito').addEventListener('click', () => {
             console.log('navigate visi clicked!');
-            // code to navigate using google maps app
+            const jsonDv = {
+              codVend : '1',
+              codCli : marker.idCliente,
+              latitud:  MapaPage.latitud,
+              longitud: MapaPage.longitud
+            };
+            this.sqlservices.setUbicacionVisitoVendedor(jsonDv).subscribe( (Data: any)=>{
+              console.log(Data);
+              console.log(Data.objeto);
+// code to navigate using google maps app
             // eslint-disable-next-line max-len
             marker.setIcon(this.svgCheckVisited());
             infoWindow.setContent('<div id="content">' +
@@ -266,7 +455,9 @@ export class MapaPage {
           '</div>');
             // eslint-disable-next-line max-len
             // window.open('https://www.google.com/maps/dir/?api=1&destination=' + marker.latitude + ',' + marker.longitude+'&waypoints=19.4522879,-70.6553089%7C19.451831,-70.654702');
-          });
+          this.presentVisitoAlert();
+            });
+            });
         } catch (error) {
 
         }
@@ -275,6 +466,14 @@ export class MapaPage {
 
     });
     this.infoWindows.push(infoWindow);
+  }
+  async presentVisitoAlert() {
+    const alert = this.alertController.create({
+      header: 'Confirmacion',
+      message: 'El Cliente se ha marcado como visitado',
+      buttons: ['Cerrar']
+    });
+     (await alert).present();
   }
 
   generateRoute(destino: any){
@@ -305,14 +504,21 @@ export class MapaPage {
     }
   }
 
-  showMap() {
-    this.geolocation.getCurrentPosition().then(async (resp) => {
-      const location = new google.maps.LatLng(resp.coords.latitude,resp.coords.longitude);
+  showMap2() {
+    const json = localStorage.getItem('ubication');
+    const conv = JSON.parse(json);
+    try {
+      if (conv.latitude === 0 || conv.latitude === undefined) {
+      this.showMap();
+    } else {
 
+      const location = new google.maps.LatLng(conv.latitude,conv.longitude);
+
+      console.log(conv.latitude +' - '+conv.longitude);
       const au ={
         title: 'Mi Ubicacion',
-        latitude: resp.coords.latitude.toString(10),
-        longitude: resp.coords.longitude.toString(10),
+        latitude: conv.latitude.toString(10),
+        longitude: conv.longitude.toString(10),
       };
       console.log(au);
       // this.markers.push(au);
@@ -321,7 +527,111 @@ export class MapaPage {
         zoom: 15,
 
       };
-      this.map = new google.maps.Map(this.mapRef.nativeElement, options);
+      if(this.map === undefined){
+        this.map = new google.maps.Map(this.mapRef.nativeElement, options);
+      }
+
+
+  const locationButton = document.createElement('button');
+
+  locationButton.textContent = 'Ir al punto de Mi Ubicacion';
+  locationButton.classList.add('buttonP');
+
+  // this.map.controls[google.maps.ControlPosition.TOP_CENTER].push(locationButton);
+
+
+  const po = {
+    lat: au.latitude,
+    lng: au.longitude,
+  };
+
+  this.setYourPositionOnMap(po);
+
+
+
+  // locationButton.addEventListener('click', () => {
+  //   console.log('posi');
+  //   // Try HTML5 geolocation.
+  //   if (navigator.geolocation) {
+  //     navigator.geolocation.getCurrentPosition(
+  //       (position: GeolocationPosition) => {
+  //         const pos = {
+  //           lat: position.coords.latitude,
+  //           lng: position.coords.longitude,
+  //         };
+  //         this.setYourPositionOnMap(pos);
+
+
+  //       },
+  //       () => {
+  //         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  //         this.handleLocationError(true, this.infoWindow, this.map.getCenter()!);
+  //       }
+  //     );
+  //   } else {
+  //     // Browser doesn't support Geolocation
+  //     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  //     this.handleLocationError(false, this.infoWindow, this.map.getCenter()!);
+  //   }
+  // });
+
+    this.addMarkersToMap(this.markers);
+     setInterval(async () => {
+
+      this.loadPosiByAppcomponet();
+
+
+
+    }, 1000);
+
+    }
+    } catch (error) {
+      console.log(error);
+      this.showMap();
+    }
+
+
+
+
+
+
+
+  }
+  loadPosiByAppcomponet(){
+    const json = localStorage.getItem('ubication');
+    const conv = JSON.parse(json);
+    console.log('hh'+conv.latitude);
+    if(MapaPage.miUbiEnElMap!== undefined){
+        MapaPage.latitud = conv.latitude;
+    MapaPage.longitud = conv.longitude;
+    const latlng1 = new google.maps.LatLng(conv.latitude, conv.longitude);
+    MapaPage.miUbiEnElMap.setPosition(latlng1);
+    }
+  }
+  showMap() {
+    console.log('ene');
+    this.geolocation.getCurrentPosition().then(async (resp) => {
+      console.log('entre');
+      const location = new google.maps.LatLng(resp.coords.latitude,resp.coords.longitude);
+
+      console.log(resp.coords);
+      const au ={
+        title: 'Mi Ubicacion',
+        latitude: resp.coords.latitude.toString(10),
+        longitude: resp.coords.longitude.toString(10),
+      };
+      localStorage.setItem('ubication',JSON.stringify(au));
+      console.log(au);
+      // this.markers.push(au);
+      const options = {
+        center: location,
+        zoom: 15,
+
+      };
+      console.log('hola: '+this.map);
+      if(this.map === undefined){
+        this.map = new google.maps.Map(this.mapRef.nativeElement, options);
+      }
 
 
   const locationButton = document.createElement('button');
@@ -369,9 +679,19 @@ export class MapaPage {
 
     this.addMarkersToMap(this.markers);
     const optio = { timeout: 600 , enableHighAccuracy: true };
-          if(this.miUbiEnElMap!== undefined){
+          if(MapaPage.miUbiEnElMap!== undefined){
             const watchID = navigator.geolocation.watchPosition(auxi => {
               // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+              const valau = {
+                lat: auxi.coords.latitude,
+                lng: auxi.coords.longitude,
+              };
+              const au2 ={
+                title: 'Mi Ubicacion',
+                latitude: auxi.coords.latitude.toString(10),
+                longitude: auxi.coords.longitude.toString(10),
+              };
+              localStorage.setItem('ubication',JSON.stringify(au2));
               console.log('ff'+auxi.coords.latitude);
               this.setloadUbi(auxi);
             },
@@ -379,6 +699,7 @@ export class MapaPage {
               optio
               );
           }
+
      }).catch((error) => {
        console.log('Error getting location', error);
        this.errorAlert();
@@ -388,11 +709,13 @@ export class MapaPage {
 
   }
 
+
+
   setloadUbi(position){
-    this.latitud = position.coords.latitude;
-    this.longitud = position.coords.longitude;
+      MapaPage.latitud = position.coords.latitude;
+    MapaPage.longitud = position.coords.longitude;
     const latlng1 = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
-    this.miUbiEnElMap.setPosition(latlng1);
+    MapaPage.miUbiEnElMap.setPosition(latlng1);
   }
   listenButtonShowUbi(){
     this.infoWindow = new google.maps.InfoWindow();
@@ -400,9 +723,10 @@ export class MapaPage {
     // Try HTML5 geolocation.
 
     const pos = {
-      lat: this.latitud,
-      lng: this.longitud,
+      lat:  MapaPage.latitud,
+      lng: MapaPage.longitud,
     };
+    console.log(pos);
     this.setYourPositionOnMap(pos);
     this.infoWindow.setPosition(pos);
     this.infoWindow.setContent('Mi Ubicacion');
@@ -413,8 +737,8 @@ export class MapaPage {
     //   navigator.geolocation.getCurrentPosition(
     //     (position: GeolocationPosition) => {
     //       const pos = {
-    //         lat: this.latitud,
-    //         lng: this.longitud,
+    //         lat:   MapaPage.latitud,
+    //         lng: MapaPage.longitud,
     //       };
     //       this.setYourPositionOnMap(pos);
     //       this.infoWindow.setPosition(pos);
@@ -446,18 +770,17 @@ export class MapaPage {
       coords: [1, 1, 1, 20, 18, 20, 18, 1],
       type: 'poly',
     };
-    if(this.miUbiEnElMap=== undefined){
+    if(MapaPage.miUbiEnElMap=== undefined){
       const position1 = new google.maps.LatLng(pos.lat, pos.lng);
-    this.miUbiEnElMap = new google.maps.Marker({
+    MapaPage.miUbiEnElMap = new google.maps.Marker({
       position: position1,
       shape,
       title: 'Mi Ubicacion',
       latitude: pos.lat,
       longitude: pos.lng,
-      label: this.labels[this.labelIndex++ % this.labels.length],
       icon: this.svgMyLocation(),
     });
-    this.miUbiEnElMap.setMap(this.map);
+    MapaPage.miUbiEnElMap.setMap(this.map);
     this.map.setCenter(pos);
 
 
@@ -465,9 +788,14 @@ export class MapaPage {
 
     }else{
       const latlng1 = new google.maps.LatLng(pos.lat, pos.lng);
-    this.miUbiEnElMap.setPosition(latlng1);
+    MapaPage.miUbiEnElMap.setPosition(latlng1);
     this.map.setCenter(latlng1);
     }
+    const latlng1 = new google.maps.LatLng(pos.lat, pos.lng);
+
+    setInterval(()=>{
+      this.loadCircleRound(null);
+    },50);
 
 
 
