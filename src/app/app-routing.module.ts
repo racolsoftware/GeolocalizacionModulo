@@ -4,7 +4,7 @@ import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
 const routes: Routes = [
   {
     path: '',
-    redirectTo: 'folder/Inbox',
+    redirectTo: 'inicio',
     pathMatch: 'full'
   },
   {
@@ -26,6 +26,18 @@ const routes: Routes = [
   {
     path: 'ruta-dia',
     loadChildren: () => import('./ruta-dia/ruta-dia.module').then( m => m.RutaDiaPageModule)
+  },
+  {
+    path: 'ruta-asignada',
+    loadChildren: () => import('./ruta-asignada/ruta-asignada.module').then( m => m.RutaAsignadaPageModule)
+  },
+  {
+    path: 'inicio',
+    loadChildren: () => import('./inicio/inicio.module').then( m => m.InicioPageModule)
+  },
+  {
+    path: 'configuracion',
+    loadChildren: () => import('./configuracion/configuracion.module').then( m => m.ConfiguracionPageModule)
   }
 ];
 

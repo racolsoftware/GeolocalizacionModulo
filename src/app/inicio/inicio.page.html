@@ -1,0 +1,249 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+      <ion-buttons slot="start">
+    <ion-menu-button></ion-menu-button>
+  </ion-buttons>
+  <ion-title>Inicio</ion-title>
+  </ion-toolbar>
+
+</ion-header>
+
+
+
+<ion-content [scrollEvents]="true" (ionScroll)="getScrollPos($event.detail.scrollTop)">
+
+  <div class="slides ion-margin-bottom">
+
+    <ion-slides [options]="slidesOptions">
+      <!-- <ion-slide>
+        <ion-card>
+          <ion-card-header>
+            <div class="main">
+              <img src="https://cfl.dropboxstatic.com/static/images/logo_catalog/twitter-card-glyph_m1%402x.png">
+            </div>
+            <img class="files" src="https://i.ibb.co/jD8ypLq/files.jpg">
+          </ion-card-header>
+          <ion-card-content class="ion-text-left">
+            <ion-card-title class="ion-margin-bottom">Dropbox</ion-card-title>
+            <ion-card-subtitle class="ion-text-right">10/50GB</ion-card-subtitle>
+            <ion-progress-bar value="0.5" color="custom"></ion-progress-bar>
+          </ion-card-content>
+        </ion-card>
+      </ion-slide>
+
+      <ion-slide>
+        <ion-card>
+          <ion-card-header>
+            <div class="main">
+              <img src="https://www.freeiconspng.com/uploads/google-drive-icon-18.png">
+            </div>
+            <img class="files" src="https://i.ibb.co/jD8ypLq/files.jpg">
+          </ion-card-header>
+          <ion-card-content class="ion-text-left">
+            <ion-card-title class="ion-margin-bottom">Google Drive</ion-card-title>
+            <ion-card-subtitle class="ion-text-right">10/50GB</ion-card-subtitle>
+            <ion-progress-bar value="0.4" color="warning"></ion-progress-bar>
+          </ion-card-content>
+        </ion-card>
+      </ion-slide> -->
+
+      <ion-slide>
+
+        <ion-card>
+          <!-- <ion-row class="ion-align-items-center">
+            <ion-col size="6">
+              <ion-buttons [ngClass]="asignado" (click)="cambioPosision(1)">
+                <ion-title>Asignado</ion-title>
+          </ion-buttons>
+            </ion-col>
+            <ion-col size="6">
+              <ion-buttons  [ngClass]="personali" (click)="cambioPosision(2)">
+                <ion-title>Personalizado</ion-title>
+              </ion-buttons>
+            </ion-col>
+
+          </ion-row> -->
+
+          <ion-card-header>
+            <ion-toolbar >
+              <div class="main" slot="start">
+              <ion-icon name="person-outline" color="blue"></ion-icon>
+            </div>
+            <ion-card-content class="ion-text-left">
+              <h1 class="ion-margin-bottom" >Cliente Visitado</h1>
+              <h6 class="ion-margin-bottom">{{fecha}}</h6>
+            </ion-card-content>
+
+
+
+            </ion-toolbar>
+
+            <canvas #doughnutCanvas style="position: relative; height:10vh; width:40vw"></canvas>
+          </ion-card-header>
+          <ion-card-content class="ion-text-left">
+            <ion-card-title class="ion-margin-bottom">Cliente Visitado</ion-card-title>
+            <ion-card-subtitle class="ion-text-right">{{visitado}}/{{total}} Visitado</ion-card-subtitle>
+            <ion-progress-bar value={{progress}} color="success"></ion-progress-bar>
+
+          </ion-card-content>
+        </ion-card>
+      </ion-slide>
+
+    </ion-slides>
+  </div>
+
+  <div class="container">
+
+
+
+
+
+    <ion-slides pager="true" [options]="slidesOptions">
+      <ion-slide>
+
+        <ion-card>
+                 <h2>Pendiente a Visitar</h2>
+
+
+<ion-list>
+  <ion-item lines="none"  *ngFor="let item of resultsPendiente" (click)="detailsCliente(item.Codigo)">
+    <ion-grid>
+      <ion-row class="ion-align-items-center">
+        <ion-col size="3">
+          <ion-button color="light" fill="clear">
+            <ion-icon slot="icon-only" name="person-outline"></ion-icon>
+          </ion-button>
+        </ion-col>
+        <ion-col size="7">
+          <ion-label>
+            <h3>{{ item.RazonSocial }}</h3>
+            <h4>{{ item.Nombre }}</h4>
+            <h4> Codigo: {{ item.Codigo }}</h4>
+            <h4>Ubicacion: {{ item.reg }}</h4>
+          </ion-label>
+        </ion-col>
+        <ion-col size="2">
+          <ion-button color="light" fill="clear">
+            <ion-icon slot="icon-only" name="eye-outline"></ion-icon>
+          </ion-button>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </ion-item>
+
+
+</ion-list>
+<ion-infinite-scroll threshold="100px" (ionInfinite)="loadData($event)" >
+  <ion-infinite-scroll-content style="color: antiquewhite;"
+    loadingSpinner="bubbles"
+    loadingText="Cargando Mas Datos...">
+  </ion-infinite-scroll-content>
+</ion-infinite-scroll>
+
+        </ion-card>
+
+      </ion-slide>
+
+      <ion-slide>
+        <ion-card>
+
+          <h2>Visitado</h2>
+
+
+<ion-list>
+  <ion-item lines="none"  *ngFor="let item of resultsVisito" (click)="detailsCliente(item.Codigo)">
+    <ion-grid>
+      <ion-row class="ion-align-items-center">
+        <ion-col size="3">
+          <ion-button color="light" fill="clear">
+            <ion-icon slot="icon-only" name="person-outline"></ion-icon>
+          </ion-button>
+        </ion-col>
+        <ion-col size="7">
+          <ion-label>
+            <h3>{{ item.RazonSocial }}</h3>
+            <h4>{{ item.Nombre }}</h4>
+            <h4> Codigo: {{ item.Codigo }}</h4>
+            <h4>Ubicacion: {{ item.reg }}</h4>
+          </ion-label>
+        </ion-col>
+        <ion-col size="2">
+          <ion-button color="light" fill="clear">
+            <ion-icon slot="icon-only" name="eye-outline"></ion-icon>
+          </ion-button>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </ion-item>
+
+
+</ion-list>
+<ion-infinite-scroll threshold="100px" (ionInfinite)="loadData($event)" >
+  <ion-infinite-scroll-content style="color: antiquewhite;"
+    loadingSpinner="bubbles"
+    loadingText="Cargando Mas Datos...">
+  </ion-infinite-scroll-content>
+</ion-infinite-scroll>
+
+        </ion-card>
+
+
+      </ion-slide>
+    </ion-slides>
+
+
+
+
+<!-- <h2>Sin Visitar</h2>
+<ion-list></ion-list>
+    <ion-item lines="none">
+      <ion-grid>
+        <ion-row class="ion-align-items-center">
+          <ion-col size="3">
+            <ion-button color="light" fill="clear">
+              <ion-icon slot="icon-only" name="document"></ion-icon>
+            </ion-button>
+          </ion-col>
+          <ion-col size="7">
+            <ion-label>
+							<h4>Project.PDF</h4>
+							<h6>Google Drive/Docs</h6>
+						</ion-label>
+          </ion-col>
+          <ion-col size="2">
+            <ion-button color="light" fill="clear">
+              <ion-icon slot="icon-only" name="ellipsis-vertical"></ion-icon>
+            </ion-button>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+    </ion-item>
+
+        <ion-item lines="none">
+      <ion-grid>
+        <ion-row class="ion-align-items-center">
+          <ion-col size="3">
+            <ion-button color="light" fill="clear">
+              <ion-icon slot="icon-only" name="film"></ion-icon>
+            </ion-button>
+          </ion-col>
+          <ion-col size="7">
+            <ion-label>
+							<h4>Project.MP4</h4>
+							<h6>Dropbox/Videos</h6>
+						</ion-label>
+          </ion-col>
+          <ion-col size="2">
+            <ion-button color="light" fill="clear">
+              <ion-icon slot="icon-only" name="ellipsis-vertical"></ion-icon>
+            </ion-button>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+    </ion-item> -->
+
+  </div>
+  <div class="back-to-top-btn" *ngIf="backToTop" (click)="gotToTop()">
+    <ion-icon name="chevron-up-outline" ></ion-icon>
+  </div>
+</ion-content>

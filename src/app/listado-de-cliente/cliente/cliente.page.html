@@ -41,11 +41,20 @@
     </ion-item>
     <ion-button color="danger" mode="ios" expand="block" shape="round" *ngIf="showUbi" (click)="openMap(latitude,longitude)">
       <ion-icon slot="start" name="paper-plane-outline"></ion-icon>
-      Visitar
+      Ver en el Mapa
     </ion-button>
+
     <ion-button (click)="avisoParaTomarUbicacion()" color="success" mode="ios" expand="block" shape="round" *ngIf="saveUbi">
       <ion-icon slot="start" name="paper-plane-outline"></ion-icon>
         Guardar Ubicacion
+    </ion-button>
+    <ion-button color="primary" mode="ios" expand="block" shape="round" *ngIf="showUbi && visite!==true" (click)="visitoCliente()">
+      <ion-icon slot="start" name="save-outline"></ion-icon>
+      Registrar Visita
+    </ion-button>
+    <ion-button color="primary" mode="ios" expand="block" shape="round" *ngIf="showUbi && visite===true" >
+      <ion-icon slot="start" name="calendar-outline"></ion-icon>
+      Visito: {{getdate(fecha)}}
     </ion-button>
 
   </div>

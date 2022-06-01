@@ -2,6 +2,7 @@ import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { IonContent, IonInfiniteScroll, Platform } from '@ionic/angular';
 import { Observable } from 'rxjs';
+import { AppComponent } from '../app.component';
 import { DataService } from '../services/data.service';
 
 @Component({
@@ -26,6 +27,7 @@ export class ListadoDeClientePage implements OnInit, OnDestroy {
   constructor(private platform: Platform,  public sqlservices: DataService, public router: Router, private route: ActivatedRoute ) { }
 
   ngOnInit() {
+    AppComponent.startLoading();
     this.results = [];
     const jsonDv = {
       codVend : this.idVendedor,
@@ -40,9 +42,14 @@ export class ListadoDeClientePage implements OnInit, OnDestroy {
 
 // if(Data.resultado === 1){
   Data.objeto.forEach(element => {
+    if(element.latitude !== ''){
+      element.reg= 'Registrado';
+    }else{
+      element.reg= 'Sin Registrar';
+    }
     this.results.push(element);
   });
-
+  AppComponent.stopLoading();
 });
 
 
@@ -80,6 +87,11 @@ export class ListadoDeClientePage implements OnInit, OnDestroy {
 
 // if(Data.resultado === 1){
   Data.objeto.forEach(element => {
+    if(element.latitude !== ''){
+      element.reg= 'Registrado';
+    }else{
+      element.reg= 'Sin Registrar';
+    }
     this.results.push(element);
   });
 
@@ -117,6 +129,11 @@ export class ListadoDeClientePage implements OnInit, OnDestroy {
 
   // if(Data.resultado === 1){
     Data.objeto.forEach(element => {
+      if(element.latitude !== ''){
+        element.reg= 'Registrado';
+      }else{
+        element.reg= 'Sin Registrar';
+      }
       this.results.push(element);
     });
 

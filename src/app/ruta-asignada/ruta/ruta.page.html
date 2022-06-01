@@ -1,0 +1,89 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button
+        icon="chevron-back"
+        defaultHref="/ruta-asignada"
+      ></ion-back-button>
+    </ion-buttons>
+    <ion-title>Ruta Asignada</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [scrollEvents]="true">
+  <div class="ion-padding">
+    <ion-card class="ion-margin-bottom">
+      <ion-card-content>
+        <ion-row>
+          <ion-col size="12" class="ion-margin-bottom">
+            <ion-card-title>{{descripcion}}</ion-card-title>
+
+            <ion-card-subtitle>Dia de la semana: {{descripcion2}}</ion-card-subtitle>
+            <ion-card-subtitle>Total de cliente: {{totalCliente}}</ion-card-subtitle>
+            <ion-card-subtitle>Cliente visitado: {{visito}}</ion-card-subtitle>
+            <ion-card-subtitle>Cliente sin visitar: {{sinVisitar}}</ion-card-subtitle>
+          </ion-col>
+        </ion-row>
+      </ion-card-content>
+    </ion-card>
+  </div>
+  <br />
+  <br />
+  <br />
+  <br />
+
+  <ion-item>
+    <ion-label>Clientes de la Ruta</ion-label>
+
+  </ion-item>
+
+  <ion-list>
+    <ion-toolbar  >
+      <ion-title slot="start"></ion-title>
+      <ion-button text-center  color="warning" mode="ios" expand="block" button (click)="showInMap()" shape="round" >
+        <ion-icon   name="map-outline"></ion-icon>
+        ver
+      </ion-button>
+      <ion-title slot="end"></ion-title>
+    </ion-toolbar>
+
+    <ion-reorder-group (ionItemReorder)="onRenderItems($event)" disabled="true">
+      <ion-item-sliding  *ngFor="let item of results"  >
+      <ion-item slot="top"
+
+    >
+      <ion-avatar slot="start">
+        <ion-icon name="person-outline" color="blue"></ion-icon>
+      </ion-avatar>
+
+      <ion-label text-wrap>
+        <div button
+        (click)="detailsCliente(item.Codigo)" >
+          <h3>{{ item.RazonSocial }}</h3>
+        <h4>{{ item.Nombre }}</h4>
+        <h4>Codigo: {{ item.Codigo }}</h4>
+        <h4>Ubicacion: {{ item.reg }}</h4>
+        </div>
+
+        <ion-toolbar >
+          <ion-label slot="start" button
+
+          (click)="detailsCliente(item.Codigo)">Visito Hoy:
+
+        </ion-label>
+        <ion-icon slot="start" color="success" *ngIf="item.Visito === '1'" name="checkmark-outline"></ion-icon>
+          <ion-icon slot="start" color="danger" *ngIf="item.Visito === '0'" name="close-outline"></ion-icon>
+
+          <ion-button  slot="end" color="light" (click)="presentConfirm(item.Codigo)" >Agregar</ion-button>
+        </ion-toolbar>
+      </ion-label>
+      <ion-reorder slot="end"></ion-reorder>
+    </ion-item>
+    <ion-item-options slot="end">
+      <ion-button color="success" style="height: auto;" (click)="presentConfirm(item.Codigo)" >Agregar</ion-button>
+    </ion-item-options>
+  </ion-item-sliding>
+    </ion-reorder-group>
+
+  </ion-list>
+</ion-content>

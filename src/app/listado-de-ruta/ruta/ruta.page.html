@@ -33,13 +33,39 @@
 
   <ion-item>
     <ion-label>Clientes de la Ruta</ion-label>
-    <ion-button (click)="registerRutaCliente()" slot="end"color="success">+</ion-button>
+    <ion-button *ngIf="this.puedeAdd" (click)="registerRutaCliente()" slot="end"color="success">+</ion-button>
   </ion-item>
 
   <ion-list>
+    <ion-toolbar  >
+
+      <ion-button slot="start"  color="danger" mode="ios" expand="block" button (click)="createRouteAndOpenMap()" shape="round" >
+        <ion-icon   name="paper-plane-outline"></ion-icon>
+        Ruta
+      </ion-button>
+      <ion-button   color="warning" mode="ios" expand="block" button (click)="showInMap()" shape="round" >
+        <ion-icon   name="map-outline"></ion-icon>
+        Ver
+      </ion-button>
+      <ion-button slot="end" *ngIf="default==='2'" (click)="updateReorder()" mode="ios" expand="block" button  shape="round">
+        <ion-icon name="reorder-four-outline"></ion-icon>
+        Reordenar
+      </ion-button>
+      <ion-button slot="end" *ngIf="default!=='2'" disabled="true" mode="ios" expand="block" button  shape="round">
+        <ion-icon name="reorder-four-outline"></ion-icon>
+        Reordenar
+      </ion-button>
+    </ion-toolbar>
+    <ion-item>
+      <ion-label>Tipo de Busqueda: </ion-label>
+      <ion-select [(ngModel)]="default" (ionChange)="selectChanged()"  >
+        <ion-select-option value="2">Todos</ion-select-option>
+        <ion-select-option *ngFor="let item of estadoVisita " [value]="item.valor">{{item.nombre}}</ion-select-option>
+      </ion-select>
+    </ion-item>
     <ion-reorder-group (ionItemReorder)="onRenderItems($event)" disabled="false">
 
-      <ion-item
+      <!-- <ion-item
       button
       *ngFor="let item of results"
       (click)="detailsCliente(item.Codigo)"
@@ -54,7 +80,50 @@
         <h4>Codigo: {{ item.Codigo }}</h4>
       </ion-label>
       <ion-reorder slot="end"></ion-reorder>
+    </ion-item> -->
+
+
+    <ion-item-sliding button *ngFor="let item of results"  >
+      <ion-item slot="top">
+
+
+        <ion-avatar slot="start">
+          <ion-icon name="person-outline" color="blue"></ion-icon>
+        </ion-avatar>
+
+        <ion-label text-wrap>
+          <div button
+
+          (click)="detailsCliente(item.Codigo)">
+<h3>{{ item.RazonSocial }}</h3>
+          <h4>{{ item.Nombre }}</h4>
+          <h4>Codigo: {{ item.Codigo }}</h4>
+          <h4>Ubicacion: {{ item.reg }}</h4>
+
+          </div>
+
+          <ion-toolbar >
+            <ion-label slot="start" button
+
+            (click)="detailsCliente(item.Codigo)">Visito Hoy:
+
+          </ion-label>
+          <ion-icon slot="start" color="success" *ngIf="item.Visito === '1'" name="checkmark-outline"></ion-icon>
+            <ion-icon slot="start" color="danger" *ngIf="item.Visito === '0'" name="close-outline"></ion-icon>
+
+          <ion-button slot="end" color="light" (click)="deleteCliente(item.Codigo)"  >Eliminar</ion-button>
+          </ion-toolbar>
+        </ion-label>
+        <ion-reorder slot="end"></ion-reorder>
+
+
     </ion-item>
+      <ion-item-options slot="end">
+
+        <ion-button color="danger" (click)="deleteCliente(item.Codigo)" style="height: auto;" >Eliminar</ion-button>
+      </ion-item-options>
+
+    </ion-item-sliding>
 
     </ion-reorder-group>
 

@@ -3,7 +3,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { RouteReuseStrategy } from '@angular/router';
 import { HttpClientModule } from '@angular/common/http';
 
-import { IonicModule, IonicRouteStrategy } from '@ionic/angular';
+import { AlertController, IonicModule, IonicRouteStrategy } from '@ionic/angular';
 
 import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
@@ -14,7 +14,16 @@ import { Geolocation } from '@ionic-native/geolocation/ngx';
 import { AndroidPermissions } from '@ionic-native/android-permissions/ngx';
 import { LocationAccuracy } from '@ionic-native/location-accuracy/ngx';
 import { NativeGeocoder } from '@ionic-native/native-geocoder/ngx';
+import { SQLite } from '@ionic-native/SQLite/ngx';
 import { InAppBrowser } from '@awesome-cordova-plugins/in-app-browser/ngx';
+import { BackgroundGeolocation } from '@ionic-native/background-geolocation/ngx';
+import { BackgroundMode } from '@awesome-cordova-plugins/background-mode/ngx';
+import { ForegroundService } from '@awesome-cordova-plugins/foreground-service/ngx';
+import { alertController } from '@ionic/core';
+import { Chart } from 'chart.js';
+import { OpenNativeSettings } from '@awesome-cordova-plugins/open-native-settings/ngx';
+
+
 
 @NgModule({
   declarations: [AppComponent],
@@ -23,13 +32,21 @@ import { InAppBrowser } from '@awesome-cordova-plugins/in-app-browser/ngx';
     IonicModule.forRoot(),
     AppRoutingModule,
     HttpClientModule,
+
   ],
   providers: [
+
+    AlertController,
+    ForegroundService,
+    BackgroundMode,
+    BackgroundGeolocation,
+    OpenNativeSettings,
     InAppBrowser,
     AndroidPermissions,
     Geolocation,
     LocationAccuracy,
     NativeGeocoder,
+    SQLite,
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy }],
   bootstrap: [AppComponent],
 })

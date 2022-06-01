@@ -1,7 +1,8 @@
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { IonContent, IonInfiniteScroll, Platform } from '@ionic/angular';
+import { AlertController, IonContent, IonInfiniteScroll, Platform } from '@ionic/angular';
 import { Observable } from 'rxjs';
+import { AppComponent } from '../app.component';
 import { DataService } from '../services/data.service';
 
 @Component({
@@ -21,7 +22,7 @@ export class ListadoDeRutaPage implements OnInit, OnDestroy {
   maxElement = 15;
   idVendedor = '1';
   default = '0';
-  departamento = [
+  diaSemana = [
     { nombre: 'Domingo', valor: 1 },
     { nombre: 'Lunes', valor: 2 },
     { nombre: 'Martes', valor: 3 },
@@ -34,7 +35,8 @@ export class ListadoDeRutaPage implements OnInit, OnDestroy {
     private platform: Platform,
     public sqlservices: DataService,
     public router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private alertCtrl: AlertController
   ) {}
 
   ngOnInit() {
@@ -57,9 +59,38 @@ export class ListadoDeRutaPage implements OnInit, OnDestroy {
       });
     });
   }
+
+  ionViewWillEnter() {
+    AppComponent.startLoading();
+    this.searchTerm = '';
+
+    this.pagination = 1;
+    this.maxElement = 15;
+    this.idVendedor = '1';
+    this.default = '0';
+    this.results = [];
+    const jsonDv = {
+      codVend: this.idVendedor,
+      posi: this.pagination,
+      cantidadMostra: this.maxElement,
+      busqueda: this.searchTerm,
+      day: parseInt(this.default, 10),
+    };
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    this.sqlservices.getRutas(jsonDv).subscribe((Data: any) => {
+      console.log(Data);
+      console.log(Data.objeto);
+
+      // if(Data.resultado === 1){
+      Data.objeto.forEach((element) => {
+        this.results.push(element);
+      });
+      AppComponent.stopLoading();
+    });
+  }
   selectDia(dia: string) {
     let vsa = 'Error';
-    this.departamento.forEach((element) => {
+    this.diaSemana.forEach((element) => {
       if (element.valor.toString() === dia) {
         vsa = element.nombre;
       }
@@ -150,7 +181,7 @@ export class ListadoDeRutaPage implements OnInit, OnDestroy {
   registerRuta() {
     this.router.navigate(['/listado-de-ruta/register-ruta']);
   }
-  detailsCliente(codi: string) {
+  detailsRuta(codi: string) {
     this.router.navigate(['/listado-de-ruta/ruta'], {
       queryParams: { codigo: codi },
     });
@@ -193,6 +224,58 @@ export class ListadoDeRutaPage implements OnInit, OnDestroy {
     }, 500);
   }
 
+  async deleteRuta(codi: string){
+    const alert = await this.alertCtrl.create({
+      cssClass: 'alertLogCss',
+      header: 'Advertencia',
+      message: '¿Esta seguro que desea eliminar esta ruta?',
+      buttons: [
+        {
+          text: 'Cancelar',
+          role: 'cancel',
+          handler: () => {
+            console.log('Cancel clicked');
+          }
+        },
+        {
+          text: 'Aceptar',
+          handler: () => {
+            this.searchTerm = '';
+
+            this.pagination = 1;
+            this.maxElement = 15;
+            this.idVendedor = '1';
+            this.default = '0';
+            const jsonDv = {
+              codRuta: codi,
+              codVend: this.idVendedor,
+              posi: this.pagination,
+              cantidadMostra: this.maxElement,
+              busqueda: this.searchTerm,
+              day: parseInt(this.default, 10),
+            };
+
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            this.sqlservices.setDeleteRuta(jsonDv).subscribe((Data: any)=>{
+              this.results = [];
+              console.log(Data);
+              console.log(Data.objeto);
+
+              // if(Data.resultado === 1){
+              Data.objeto.forEach((element) => {
+                this.results.push(element);
+              });
+
+            });
+
+          }
+        }
+      ]
+    });
+    await alert.present();
+
+
+  }
   toggleInfiniteScroll() {
     this.infiniteScroll.disabled = !this.infiniteScroll.disabled;
   }

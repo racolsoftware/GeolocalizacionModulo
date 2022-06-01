@@ -3,7 +3,7 @@
     <ion-buttons slot="start">
       <ion-menu-button></ion-menu-button>
     </ion-buttons>
-    <ion-title>Listado De Ruta</ion-title>
+    <ion-title>Listado De Ruta Personalizada</ion-title>
   </ion-toolbar>
 </ion-header>
 
@@ -18,7 +18,7 @@
     <ion-label>Seleccione El Dia de la Semana</ion-label>
     <ion-select [(ngModel)]="default" (ionChange)="searchChanged()"  >
       <ion-select-option value="0">Todos</ion-select-option>
-      <ion-select-option *ngFor="let item of departamento " [value]="item.valor">{{item.nombre}}</ion-select-option>
+      <ion-select-option *ngFor="let item of diaSemana " [value]="item.valor">{{item.nombre}}</ion-select-option>
     </ion-select>
   </ion-item>
   <ion-refresher slot="fixed" id="refresher" (ionRefresh)="doRefresh($event)">
@@ -28,16 +28,27 @@
   <ion-list>
 
 
-    <ion-item button *ngFor="let item of results" (click)="detailsCliente(item.Codigo)" >
+    <ion-item button *ngFor="let item of results"  >
       <ion-avatar slot="start">
         <ion-icon name="person-outline" color="blue"></ion-icon>
       </ion-avatar>
 
       <ion-label text-wrap>
-
-        <h4>{{ item.Nombre }}</h4>
+        <div button (click)="detailsRuta(item.Codigo)">
+          <h4>{{ item.Nombre }}</h4>
         <h4> Dia: {{ selectDia(item.Dia) }}</h4>
         <h4> Codigo: {{ item.Codigo }}</h4>
+        </div>
+
+        <ion-toolbar >
+          <ion-label slot="start" button
+
+          (click)="detailsRuta(item.Codigo)">
+        </ion-label>
+
+        <ion-button slot="end" color="light" (click)="deleteRuta(item.Codigo)"  >Eliminar</ion-button>
+        </ion-toolbar>
+
       </ion-label>
       <ion-icon slot="end" name="eye-outline"></ion-icon>
 

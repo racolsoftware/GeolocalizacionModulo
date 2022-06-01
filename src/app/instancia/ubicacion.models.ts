@@ -3,4 +3,6 @@ export interface ubicacion {
   title: string;
   latitude: string;
   longitude: string;
+  visito: boolean;
+  codigo: number;
 }

@@ -40,7 +40,8 @@ export class RegisterClienteRutaPage implements OnInit, OnDestroy {
       codVend : this.sqlservices.getCodVend(),
       posi : this.pagination,
     cantidadMostra : this.maxElement,
-    busqueda : this.searchTerm
+    busqueda : this.searchTerm,
+    codRuta : this.codigoRuta
     };
     // eslint-disable-next-line @typescript-eslint/naming-convention
     this.sqlservices.getListadoCliente(jsonDv).subscribe( (Data: any)=>{
@@ -49,6 +50,11 @@ export class RegisterClienteRutaPage implements OnInit, OnDestroy {
 
 // if(Data.resultado === 1){
   Data.objeto.forEach(element => {
+    if(element.latitude !== ''){
+      element.reg= 'Registrado';
+    }else{
+      element.reg= 'Sin Registrar';
+    }
     this.results.push(element);
   });
 
@@ -79,7 +85,8 @@ export class RegisterClienteRutaPage implements OnInit, OnDestroy {
       codVend: this.idVendedor,
       posi: this.pagination,
     cantidadMostra: this.maxElement,
-    busqueda: this.searchTerm
+    busqueda: this.searchTerm,
+    codRuta : this.codigoRuta
     };
 
     // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -90,6 +97,11 @@ export class RegisterClienteRutaPage implements OnInit, OnDestroy {
 
 // if(Data.resultado === 1){
   Data.objeto.forEach(element => {
+    if(element.latitude !== ''){
+      element.reg= 'Registrado';
+    }else{
+      element.reg= 'Sin Registrar';
+    }
     this.results.push(element);
   });
 
@@ -133,7 +145,8 @@ export class RegisterClienteRutaPage implements OnInit, OnDestroy {
         codVend: this.idVendedor,
         posi: this.pagination,
       cantidadMostra: this.maxElement,
-      busqueda: this.searchTerm
+      busqueda: this.searchTerm,
+      codRuta : this.codigoRuta
       };
 
       // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -143,6 +156,11 @@ export class RegisterClienteRutaPage implements OnInit, OnDestroy {
 
   // if(Data.resultado === 1){
     Data.objeto.forEach(element => {
+      if(element.latitude !== ''){
+        element.reg= 'Registrado';
+      }else{
+        element.reg= 'Sin Registrar';
+      }
       this.results.push(element);
     });
 
