@@ -48,13 +48,20 @@
       <ion-icon slot="start" name="paper-plane-outline"></ion-icon>
         Guardar Ubicacion
     </ion-button>
-    <ion-button color="primary" mode="ios" expand="block" shape="round" *ngIf="showUbi && visite!==true" (click)="visitoCliente()">
+    <ion-button [disabled]="load" color="primary"  mode="ios" expand="block" shape="round" *ngIf="showUbi && visite!==true" (click)="visitoCliente()">
       <ion-icon slot="start" name="save-outline"></ion-icon>
       Registrar Visita
+      <ion-spinner *ngIf="load===true"  name="crescent"></ion-spinner>
     </ion-button>
-    <ion-button color="primary" mode="ios" expand="block" shape="round" *ngIf="showUbi && visite===true" >
+    <ion-button color="primary" mode="ios" expand="block" shape="round" *ngIf="showUbi && visite===true && upload === true" >
       <ion-icon slot="start" name="calendar-outline"></ion-icon>
       Visito: {{getdate(fecha)}}
+    </ion-button>
+    <ion-button [disabled]="load" color="primary" mode="ios" (click)="updateFechaNube()" expand="block" shape="round" *ngIf="showUbi && visite===true && upload === false" >
+      <ion-icon slot="start" name="calendar-outline"></ion-icon>
+      Visito: {{getdate(fecha)}}
+      <ion-icon slot="end" name="warning-outline"></ion-icon>
+      <ion-spinner *ngIf="load===true"  name="crescent"></ion-spinner>
     </ion-button>
 
   </div>

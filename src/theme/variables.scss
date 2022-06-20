@@ -75,7 +75,45 @@
   --ion-color-light-shade: #d7d8da;
   --ion-color-light-tint: #f5f6f9;
 }
+ion-item {
+  .ajustar {
+    white-space: initial !important;
+  }
+}
 
+ion-alert {
+
+  .inputSelect:active, .alert-button-inner:active, .alert-radio-label{
+
+  white-space: initial !important;
+
+
+
+  }
+   .alert-input-wrapper:active, .alert-input-disabled, .inputSelect:active {
+
+  white-space: initial !important;
+
+
+
+  }
+
+  .inputSelect {
+
+    white-space: initial !important;
+
+
+
+    }
+
+
+
+
+
+
+
+
+  }
 // @media (prefers-color-scheme: dark) {
 //   /*
 //    * Dark Colors

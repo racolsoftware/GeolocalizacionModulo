@@ -3,6 +3,7 @@ import { ActivatedRouteSnapshot, Router, RouterStateSnapshot, UrlTree } from '@a
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Title } from '@angular/platform-browser';
+import { SqlService } from './sql.service';
 
 // export const server = 'http://pagos.racolcomputers.com/data/php/'
 export const server = 'http://serverracol.ddns.net:8080/GeolocationRacolCliente/data/php/';
@@ -17,7 +18,7 @@ export class DataService {
 
 
 
-  constructor(private http: HttpClient, private router: Router, private titleService: Title ) {
+  constructor(private http: HttpClient, private router: Router, private titleService: Title, public sqlLocal: SqlService ) {
     const url=localStorage.getItem('dominio');
     if(url!==null){
       DataService.suplidorServer = JSON.parse(url);
@@ -43,7 +44,7 @@ export class DataService {
       console.log(data);
       DataService.codVend = data;
     }else{
-      DataService.codVend = '';
+      DataService.codVend = '1';
     }
     return DataService.codVend;
   }
@@ -59,11 +60,15 @@ export class DataService {
   console.log(jsonD);
     return this.http.post<any>(serverName,  jsonD );
   }
+  getSqlLocal(): SqlService{
+    return this.sqlLocal;
+  }
   setUbicacionVisitoVendedor(aux: any): Observable<any> {
     this.getCodVend();
-    aux.codVend = DataService.codVend;
+    // aux.codVend = DataService.codVend;
     const serverName = this.returnDomain() + 'Procesos/setVisitoCliente.php';
     console.log(serverName);
+
     const jsonD = JSON.stringify({
       data :aux
   });
@@ -82,7 +87,8 @@ export class DataService {
     return this.http.post<any>(serverName,  jsonD );
   }
   setAddRutaCliente(aux: any): Observable<any> {
-
+    this.getCodVend();
+    aux.codVend = DataService.codVend;
     const serverName = this.returnDomain() + 'Procesos/setAddRutaCliente.php';
     console.log(serverName);
     const jsonD = JSON.stringify({
@@ -92,7 +98,8 @@ export class DataService {
     return this.http.post<any>(serverName,  jsonD );
   }
   setDeleteClienteRuta(aux: any): Observable<any> {
-
+    this.getCodVend();
+    aux.codVend = DataService.codVend;
     const serverName = this.returnDomain() + 'Procesos/setDeleteClienteRuta.php';
     console.log(serverName);
     const jsonD = JSON.stringify({
@@ -102,7 +109,8 @@ export class DataService {
     return this.http.post<any>(serverName,  jsonD );
   }
   setDeleteRuta(aux: any): Observable<any> {
-
+    this.getCodVend();
+    aux.codVend = DataService.codVend;
     const serverName = this.returnDomain() + 'Procesos/setDeleteRuta.php';
     console.log(serverName);
     const jsonD = JSON.stringify({
@@ -112,7 +120,8 @@ export class DataService {
     return this.http.post<any>(serverName,  jsonD );
   }
   setReorderRutaCliente(aux: any): Observable<any> {
-
+    this.getCodVend();
+    aux.codVend = DataService.codVend;
     const serverName = this.returnDomain() + 'Procesos/setReorderRutaCliente.php';
     console.log(serverName);
     const jsonD = JSON.stringify({

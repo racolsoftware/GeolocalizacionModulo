@@ -7,11 +7,14 @@ import { DataService } from 'src/app/services/data.service';
 @Component({
   selector: 'app-ruta',
   templateUrl: './ruta.page.html',
-  styleUrls: ['./ruta.page.scss','./ruta.page.css'],
+  styleUrls: ['./ruta.page.scss'],
 })
 export class RutaPage implements OnInit {
+
+  selection = false;
+  cantidadSelect = 0;
   codRuta: string;
-  cantidad = 1;
+
   src = 'assets/images/product-icon.png';
   descripcion = 'Colmado Sanchez';
   descripcion2 = 'Juan Perez';
@@ -45,6 +48,29 @@ export class RutaPage implements OnInit {
       console.log(this.codRuta); // price
     });
   }
+
+  public selectItem(index: number) {
+    console.log('selecciono largo');
+    this.selection = true;
+    if(!this.results[index].isSelected === true){
+      this.cantidadSelect +=1;
+    }else{
+      this.cantidadSelect -=1;
+    }
+    if(this.cantidadSelect===0){
+      this.selection = false;
+    }
+    console.log(this.cantidadSelect);
+    this.results[index].isSelected = !this.results[index].isSelected;
+  }
+
+ public unselectAll() {
+    this.selection = false;
+    this.results.forEach(notification => {
+      notification.isSelected = false;
+    });
+   }
+
   async presentConfirm(value: any) {
     console.log(value);
     const jsonDv = {
@@ -68,12 +94,14 @@ export class RutaPage implements OnInit {
           type: 'radio',
           label: element.Codigo+' - '+element.Nombre+' - '+ this.selectDia(element.Dia),
           value: element.Codigo,
-          disabled: disabl
+          disabled: disabl,
+          cssClass: 'inputSelect',
+
         });
 
       });
       const alert = await this.alertCtrl.create({
-        cssClass: 'alertLogCss',
+        cssClass: 'inputSelect',
         header: 'Ruta del Cliente Personalizada',
         message: 'Seleccione la Ruta Personalizada que le desea asignar al cliente',
         inputs: listRuta,
@@ -98,6 +126,8 @@ export class RutaPage implements OnInit {
         ]
       });
       await alert.present();
+    },async ()=>{
+      AppComponent.errorAlert('Se produjo un error al conectarse, intentelo mas tarde');
     });
 
   }
@@ -115,6 +145,8 @@ export class RutaPage implements OnInit {
       // this.router.navigate(['/listado-de-ruta/ruta'],{
       //   queryParams: { codigo: this.codigoRuta },
       // });
+},async ()=>{
+  AppComponent.errorAlert('Se produjo un error al conectarse, intentelo mas tarde');
 });
   }
   async presentAlertConfirm(headerSt: string, messageSt: string, codRuta: string) {
@@ -205,9 +237,12 @@ export class RutaPage implements OnInit {
         }else{
           element.reg= 'Sin Registrar';
         }
+        element['isSelected'] = false;
         this.results.push(element);
       });
       this.totalCliente = this.results.length;
+    },async ()=>{
+      AppComponent.errorAlert('Se produjo un error al conectarse, intentelo mas tarde');
     });
   }
   showInMap() {
@@ -226,8 +261,11 @@ export class RutaPage implements OnInit {
       console.log(Data);
       this.results = [];
       Data.objeto.forEach((element) => {
+        element['isSelected'] = false;
         this.results.push(element);
       });
+},async ()=>{
+  AppComponent.errorAlert('Se produjo un error al conectarse, intentelo mas tarde');
 });
   }
 
@@ -241,8 +279,10 @@ export class RutaPage implements OnInit {
     return vsa;
   }
   detailsCliente(codi: string) {
-    this.router.navigate(['/listado-de-cliente/cliente'], {
+    if(this.selection===false){
+      this.router.navigate(['/listado-de-cliente/cliente'], {
       queryParams: { codigo: codi },
     });
+    }
   }
 }

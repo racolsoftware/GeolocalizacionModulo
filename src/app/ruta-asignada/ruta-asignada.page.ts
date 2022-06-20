@@ -112,6 +112,8 @@ export class RutaAsignadaPage implements OnInit, OnDestroy {
       } else {
         this.infiniteScroll.disabled = false;
       }
+    },async ()=>{
+      AppComponent.errorAlert('Se produjo un error al conectarse, intentelo mas tarde');
     });
 
     console.log('Done');

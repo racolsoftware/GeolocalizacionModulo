@@ -40,24 +40,24 @@ export class ListadoDeRutaPage implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
-    this.results = [];
-    const jsonDv = {
-      codVend: this.idVendedor,
-      posi: this.pagination,
-      cantidadMostra: this.maxElement,
-      busqueda: this.searchTerm,
-      day: parseInt(this.default, 10),
-    };
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    this.sqlservices.getRutas(jsonDv).subscribe((Data: any) => {
-      console.log(Data);
-      console.log(Data.objeto);
+    // this.results = [];
+    // const jsonDv = {
+    //   codVend: this.idVendedor,
+    //   posi: this.pagination,
+    //   cantidadMostra: this.maxElement,
+    //   busqueda: this.searchTerm,
+    //   day: parseInt(this.default, 10),
+    // };
+    // // eslint-disable-next-line @typescript-eslint/naming-convention
+    // this.sqlservices.getRutas(jsonDv).subscribe((Data: any) => {
+    //   console.log(Data);
+    //   console.log(Data.objeto);
 
-      // if(Data.resultado === 1){
-      Data.objeto.forEach((element) => {
-        this.results.push(element);
-      });
-    });
+    //   // if(Data.resultado === 1){
+    //   Data.objeto.forEach((element) => {
+    //     this.results.push(element);
+    //   });
+    // });
   }
 
   ionViewWillEnter() {

@@ -21,8 +21,6 @@ ion-list {
 }
 
 
-
-
 .progressbar li:before{
   content: counter(step);
   counter-increment: step;
@@ -66,4 +64,9 @@ ion-icon {
 
     margin: auto auto auto auto;
     display: block;
+}
+ion-toolbar {
+  --background-color: transparent;
+  --background: transparent;
+  --ion-color-base: transparent !important;
 }

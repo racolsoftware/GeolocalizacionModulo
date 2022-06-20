@@ -1,7 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { AlertController } from '@ionic/angular';
 import { Observable } from 'rxjs';
+import { AppComponent } from '../app.component';
 import { DataService } from '../services/data.service';
+import { AppVersion } from '@ionic-native/app-version/ngx';
+
 
 @Component({
   selector: 'app-configuracion',
@@ -9,12 +12,134 @@ import { DataService } from '../services/data.service';
   styleUrls: ['./configuracion.page.scss'],
 })
 export class ConfiguracionPage implements OnInit {
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  app_version: string;
+  passwordUser: any;
+  passwordConf: any;
   constructor(
     private alertCtrl: AlertController,
-    public sqlservices: DataService
+    public sqlservices: DataService,
+    private appVersion: AppVersion
   ) {}
 
-  ngOnInit() {}
+  ngOnInit() {
+    this.appVersion.getVersionNumber().then(
+      (versionNumber) => {
+        this.app_version = versionNumber;
+      },
+      (error) => {
+        console.log(error);
+      });
+      this.loadPassword();
+  }
+  loadPassword(){
+    this.passwordUser = localStorage.getItem('passwordUser');
+    this.passwordUser = JSON.parse(this.passwordUser);
+    this.passwordConf = localStorage.getItem('passwordApp');
+    this.passwordConf = JSON.parse(this.passwordConf);
+  }
+
+  async changePassword(posi: number) {
+    let aux: any;
+    let header: any;
+    let passwordOld: any;
+    let message: any;
+    switch (posi) {
+      case 1:
+        passwordOld = localStorage.getItem('passwordUser');
+        header = 'Constaseña de Acceso';
+        break;
+      case 2:
+        passwordOld = localStorage.getItem('passwordApp');
+        header = 'Constaseña de Configuracion';
+        break;
+      default:
+        break;
+    }
+    if (passwordOld !== null) {
+      aux = JSON.parse(passwordOld);
+    } else {
+      aux = '';
+    }
+    const alert = await this.alertCtrl.create({
+      cssClass: 'my-custom-class',
+      header,
+      message,
+      inputs: [
+        {
+          name: 'passwordOld',
+          type: 'password',
+          placeholder: 'Contraseña Antigua',
+          cssClass: 'specialClass',
+          attributes: {
+            minlength: 4,
+            inputmode: 'decimal',
+          },
+        },
+        {
+          name: 'passwordNew',
+          type: 'password',
+          placeholder: 'Contraseña Nueva',
+          cssClass: 'specialClass',
+          attributes: {
+            minlength: 4,
+            inputmode: 'decimal',
+          },
+        },
+        {
+          name: 'passwordNew2',
+          type: 'password',
+          placeholder: 'Repita Contraseña',
+          cssClass: 'specialClass',
+          attributes: {
+            minlength: 4,
+            inputmode: 'decimal',
+          },
+        },
+      ],
+      buttons: [
+        {
+          text: 'Cancel',
+          role: 'cancel',
+          cssClass: 'secondary',
+          handler: () => {
+            console.log('Confirm Cancel');
+          },
+        },
+        {
+          text: 'Ok',
+          handler: (value: any) => {
+            if (value.passwordOld === aux) {
+              if(value.passwordNew === value.passwordNew2){
+                switch (posi) {
+                  case 1:
+                    localStorage.setItem('passwordUser', JSON.stringify(value.passwordNew));
+                    header = 'Constaseña de Acceso guardada';
+                    this.passwordUser = value.passwordNew;
+                    break;
+                  case 2:
+                    localStorage.setItem('passwordApp', JSON.stringify(value.passwordNew));
+                    header = 'Constaseña de Configuracion guardada';
+                    this.passwordConf = value.passwordNew;
+                    break;
+                  default:
+                    break;
+                }
+                this.presentVisitoAlert();
+              console.log('Confirm Ok', value);
+              }else{
+                this.errorAlert();
+              }
+            } else {
+              this.errorAlert();
+            }
+          },
+        },
+      ],
+    });
+
+    await alert.present();
+  }
 
   async alertDomain() {
     let aux: any;
@@ -57,8 +182,66 @@ export class ConfiguracionPage implements OnInit {
         {
           text: 'Ok',
           handler: (value: any) => {
-            if (value.password === 'adminadmin') {
+            if (value.password === this.passwordConf) {
               localStorage.setItem('dominio', JSON.stringify(value.url));
+              console.log('Confirm Ok', value);
+              this.presentVisitoAlert();
+            } else {
+              this.errorAlert();
+            }
+          },
+        },
+      ],
+    });
+
+    await alert.present();
+  }
+
+  async alertconfSist() {
+    let aux: any;
+    const url = localStorage.getItem('conf');
+    if (url !== null) {
+      aux = JSON.parse(url);
+    } else {
+      aux = '';
+    }
+    const alert = await this.alertCtrl.create({
+      cssClass: 'my-custom-class',
+      header: 'Configuracion del sistema',
+      inputs: [
+        {
+          name: 'posiTime',
+          type: 'number',
+          placeholder: 'Timeout Para la toma de ubicacion',
+          value: aux.posiTime,
+        },
+        {
+          name: 'password',
+          type: 'password',
+          placeholder: 'Contraseña',
+          cssClass: 'specialClass',
+          attributes: {
+            minlength: 4,
+            inputmode: 'decimal',
+          },
+        },
+      ],
+      buttons: [
+        {
+          text: 'Cancel',
+          role: 'cancel',
+          cssClass: 'secondary',
+          handler: () => {
+            console.log('Confirm Cancel');
+          },
+        },
+        {
+          text: 'Ok',
+          handler: (value: any) => {
+            if (value.password === this.passwordConf) {
+              localStorage.setItem('conf', JSON.stringify({
+                posiTime: value.posiTime
+              }));
               console.log('Confirm Ok', value);
               this.presentVisitoAlert();
             } else {
@@ -77,16 +260,26 @@ export class ConfiguracionPage implements OnInit {
     const dominio = localStorage.getItem('dominio');
     const websocket = localStorage.getItem('websocket');
     const login = localStorage.getItem('vendedor');
+    let jsonDv;
+    if(websocket === null || websocket === undefined){
+      jsonDv = {
+        codVend: JSON.parse(login),
+        codComp: null,
+      };
+    }else{
+      jsonDv = {
+        codVend: JSON.parse(login),
+        codComp: JSON.parse(websocket).idComp,
+      };
+    }
 
-    const jsonDv = {
-      codVend: JSON.parse(login),
-    };
     let dom = false;
     let webS = false;
     let log = false;
-
+    AppComponent.startLoading();
     this.sqlservices.validateURL(JSON.parse(dominio)).subscribe(
       (res) => {
+        AppComponent.startLoading();
         dom = true;
         console.log('Dominio verificado');
 
@@ -94,6 +287,7 @@ export class ConfiguracionPage implements OnInit {
           JSON.parse(websocket).url
         ).subscribe(
           (data) => {
+            AppComponent.startLoading();
             console.log(data);
             webS = true;
             wsSubs.unsubscribe();
@@ -114,8 +308,11 @@ export class ConfiguracionPage implements OnInit {
                       JSON.stringify({
                         nombre,
                         compNombre: element.Compania,
+                        tokenGoogle: element.TokenGoogle,
                       })
                     );
+                    AppComponent.nombre = nombre;
+                    AppComponent.compania = element.Compania;
                     log = true;
                   }
                 });
@@ -217,12 +414,13 @@ export class ConfiguracionPage implements OnInit {
             );
           },
           (err1) => {
+            AppComponent.startLoading();
             console.log('error websocket');
             // eslint-disable-next-line @typescript-eslint/naming-convention
             this.sqlservices
               .getVendedor(jsonDv)
               .subscribe(async (Data: any) => {
-
+                AppComponent.startLoading();
                 console.log(Data);
                 console.log(Data.objeto);
 
@@ -240,8 +438,11 @@ export class ConfiguracionPage implements OnInit {
                       JSON.stringify({
                         nombre,
                         compNombre: element.Compania,
+                        tokenGoogle: element.TokenGoogle,
                       })
                     );
+                    AppComponent.nombre = nombre;
+                    AppComponent.compania = element.Compania;
 
                   }
                 });
@@ -292,6 +493,7 @@ export class ConfiguracionPage implements OnInit {
 
                 await alert.present();
               }, async (error) => {
+                AppComponent.startLoading();
                 console.log('error en el login');
                 const alert = await this.alertCtrl.create({
                   cssClass: 'my-custom-class',
@@ -345,12 +547,14 @@ export class ConfiguracionPage implements OnInit {
         );
       },
       (err) => {
+        AppComponent.startLoading();
         console.log('Dominio error');
         dom = false;
         const wsSubs = this.createObservableSocket(
           JSON.parse(websocket).url
         ).subscribe(
           (data) => {
+            AppComponent.startLoading();
             console.log(data);
             webS = true;
             wsSubs.unsubscribe();
@@ -371,8 +575,11 @@ export class ConfiguracionPage implements OnInit {
                       JSON.stringify({
                         nombre,
                         compNombre: element.Compania,
+                        tokenGoogle: element.TokenGoogle,
                       })
                     );
+                    AppComponent.nombre = nombre;
+                    AppComponent.compania = element.Compania;
                     log = true;
                   }
                 });
@@ -474,11 +681,13 @@ export class ConfiguracionPage implements OnInit {
             );
           },
           (err1) => {
+            AppComponent.startLoading();
             console.log('error websocket');
             // eslint-disable-next-line @typescript-eslint/naming-convention
             this.sqlservices
               .getVendedor(jsonDv)
-              .subscribe(async (Data: any) => {
+              .subscribe(
+                async (Data: any) => {
 
                 console.log(Data);
                 console.log(Data.objeto);
@@ -495,8 +704,11 @@ export class ConfiguracionPage implements OnInit {
                       JSON.stringify({
                         nombre,
                         compNombre: element.Compania,
+                        tokenGoogle: element.TokenGoogle,
                       })
                     );
+                    AppComponent.nombre = nombre;
+                    AppComponent.compania = element.Compania;
                     log = true;
                   }
                 });
@@ -546,7 +758,8 @@ export class ConfiguracionPage implements OnInit {
                 });
 
                 await alert.present();
-              }, async (error) => {
+              },
+              async (error) => {
                 console.log('error en el login');
                 const alert = await this.alertCtrl.create({
                   cssClass: 'my-custom-class',
@@ -672,7 +885,7 @@ export class ConfiguracionPage implements OnInit {
         {
           text: 'Ok',
           handler: (value: any) => {
-            if (value.password === 'adminadmin') {
+            if (value.password === this.passwordConf) {
               const jsonConv = {
                 url: value.url,
                 idComp: value.idComp,
@@ -734,7 +947,7 @@ export class ConfiguracionPage implements OnInit {
         {
           text: 'Ok',
           handler: (value: any) => {
-            if (value.password === 'adminadmin') {
+            if (value.password === this.passwordConf) {
               localStorage.setItem('vendedor', JSON.stringify(value.user));
               console.log('Confirm Ok', value);
               this.presentVisitoAlert();

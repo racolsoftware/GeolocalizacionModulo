@@ -160,11 +160,7 @@ export class RutaPage implements OnInit {
         this.resultsPrincipal.push(element);
       });
       console.log(this.results.length );
-      if(this.results.length < 9){
-        this.puedeAdd = true;
-      }else{
-        this.puedeAdd = false;
-      }
+
     });
     this.selectChanged();
   }
@@ -184,31 +180,48 @@ export class RutaPage implements OnInit {
   async createRouteAndOpenMap(){
     let aux = [];
     let noUrl = [];
-    this.results.forEach(element => {
-      if (element.latitude !== null) {
-        aux.push(element);
-      } else {
-        noUrl.push(element);
+    let count = 0;
+    this.results.forEach((element, i) => {
+      if (element.latitude !== null && element.Visito !== '1') {
+        if(count < 10){
+          aux.push(element);
+          count+=1;
+        }
+      } else if(element.latitude === null || element.latitude === '' || element.latitude === undefined) {
+        if(count < 10){
+          noUrl.push(element);
+        }
       }
     });
     console.log(this.results);
     console.log(noUrl);
-    const urlListo = this.generateRoute(aux);
+    let urlListo = this.generateRoute(aux);
     if(noUrl.length===0){
-      this.openMap(urlListo);
+      let tesShow = [];
+      aux.forEach(element => {
+        tesShow.push( {
+          type: 'text',
+          value: element.RazonSocial,
+          disabled: true,
+          cssClass: 'inputSelect',
+        });
+      });
+      this.openMapShowBefore('Aviso','Ruta de los clientes a visitar:',tesShow,urlListo);
+
     }else{
-      let stri = 'Los siguientes clientes no tienen la ubicacion asignada, al continuar, no se podran visualizar en el mapa:';
+      let stri = 'De los primeros 10 clientes, estos no tienen la ubicacion asignada, al continuar, no se podran visualizar en el mapa:';
       let test = [];
       noUrl.forEach(element => {
         test.push( {
 
           type: 'text',
           value: element.RazonSocial,
-          disabled: true
+          disabled: true,
+          cssClass: 'inputSelect',
         });
       });
       const alert = await this.alertCtrl.create({
-        cssClass: 'alertLogCss',
+        cssClass: 'inputSelect',
         header: 'Advertencia',
         message: stri,
         inputs: test,
@@ -223,8 +236,16 @@ export class RutaPage implements OnInit {
           {
             text: 'Aceptar',
             handler: () => {
-
-              this.openMap(urlListo);
+              let tesShow = [];
+              aux.forEach(element => {
+                tesShow.push( {
+                  type: 'text',
+                  value: element.RazonSocial,
+                  disabled: true,
+                  cssClass: 'inputSelect',
+                });
+              });
+              this.openMapShowBefore('Aviso','Ruta de los clientes a visitar:',tesShow,urlListo);
             }
           }
         ]
@@ -233,6 +254,33 @@ export class RutaPage implements OnInit {
 
     }
 
+  }
+
+  async openMapShowBefore(header1: string, stri: string, test: any, urlListo: string){
+    const alert = await this.alertCtrl.create({
+
+      header: header1,
+      message: stri,
+      inputs: test,
+      cssClass: 'inputSelect',
+      buttons: [
+        {
+          text: 'Cancelar',
+          role: 'cancel',
+          handler: () => {
+            console.log('Cancel clicked');
+          }
+        },
+        {
+          text: 'Aceptar',
+          handler: () => {
+
+            this.openMap(urlListo);
+          }
+        }
+      ]
+    });
+    await alert.present();
   }
 
   generateRoute(destino: any){
@@ -270,6 +318,11 @@ export class RutaPage implements OnInit {
       this.resultsPrincipal = [];
 
       Data.objeto.forEach((element) => {
+        if(element.latitude !== null){
+          element.reg= 'Registrado';
+        }else{
+          element.reg= 'Sin Registrar';
+        }
         this.results.push(element);
         this.resultsPrincipal.push(element);
       });
@@ -309,12 +362,7 @@ export class RutaPage implements OnInit {
                 this.results.push(element);
                 this.resultsPrincipal.push(element);
               });
-              if(Data.objeto.length < 9){
-                console.log('puede add');
-                this.puedeAdd = true;
-              }else{
-                this.puedeAdd = false;
-              }
+
               this.updateReorder();
 
             });

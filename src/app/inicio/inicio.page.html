@@ -77,8 +77,11 @@
 
 
             </ion-toolbar>
+            <div style="position: relative; margin: auto; width:55vw">
+              <canvas #doughnutCanvas ></canvas>
 
-            <canvas #doughnutCanvas style="position: relative; height:10vh; width:40vw"></canvas>
+            </div>
+
           </ion-card-header>
           <ion-card-content class="ion-text-left">
             <ion-card-title class="ion-margin-bottom">Cliente Visitado</ion-card-title>
@@ -94,30 +97,42 @@
 
   <div class="container">
 
+          <ion-row class="ion-align-items-center">
+            <ion-col size="6">
+              <ion-buttons [ngClass]="asignado" style="text-align: center;" (click)="cambioPosision(1)">
+                <ion-title>Pendiente</ion-title>
+          </ion-buttons>
+            </ion-col>
+            <ion-col size="6">
+              <ion-buttons  [ngClass]="personali" style="text-align: center;" (click)="cambioPosision(2)">
+                <ion-title>Visitado</ion-title>
+              </ion-buttons>
+            </ion-col>
+
+          </ion-row>
 
 
 
-
-    <ion-slides pager="true" [options]="slidesOptions">
+    <ion-slides pager="true" pager="true" (ionSlideTouchEnd)="ionSlideTouchEnd($event)" [options]="slidesOptions1"  #slidesAc>
       <ion-slide>
 
         <ion-card>
-                 <h2>Pendiente a Visitar</h2>
+                 <!-- <h2>Pendiente a Visitar</h2> -->
 
 
 <ion-list>
   <ion-item lines="none"  *ngFor="let item of resultsPendiente" (click)="detailsCliente(item.Codigo)">
     <ion-grid>
-      <ion-row class="ion-align-items-center">
-        <ion-col size="3">
-          <ion-button color="light" fill="clear">
-            <ion-icon slot="icon-only" name="person-outline"></ion-icon>
+      <ion-row class="ion-align-items-center" >
+        <ion-col size="2"    >
+          <ion-button color="light"  fill="clear"  >
+            <ion-icon slot="start" name="person-outline"></ion-icon>
           </ion-button>
         </ion-col>
-        <ion-col size="7">
+        <ion-col size="8">
           <ion-label>
-            <h3>{{ item.RazonSocial }}</h3>
-            <h4>{{ item.Nombre }}</h4>
+            <h3 >{{ item.RazonSocial }}</h3>
+            <h4  >{{ item.Nombre }}</h4>
             <h4> Codigo: {{ item.Codigo }}</h4>
             <h4>Ubicacion: {{ item.reg }}</h4>
           </ion-label>
@@ -147,7 +162,7 @@
       <ion-slide>
         <ion-card>
 
-          <h2>Visitado</h2>
+          <!-- <h2>Visitado</h2> -->
 
 
 <ion-list>

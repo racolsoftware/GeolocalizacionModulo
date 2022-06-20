@@ -50,6 +50,8 @@ export class ListadoDeClientePage implements OnInit, OnDestroy {
     this.results.push(element);
   });
   AppComponent.stopLoading();
+},async ()=>{
+  AppComponent.errorAlert('Se produjo un error al conectarse, intentelo mas tarde');
 });
 
 
