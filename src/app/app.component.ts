@@ -1,4 +1,4 @@
-import { AfterViewInit, Component } from '@angular/core';
+import { AfterViewInit, Component, NgZone, OnInit } from '@angular/core';
 import { AndroidPermissions } from '@ionic-native/android-permissions/ngx';
 import { LocationAccuracy } from '@ionic-native/location-accuracy/ngx';
 import { Geolocation } from '@ionic-native/geolocation/ngx';
@@ -16,17 +16,18 @@ import { ForegroundService } from '@awesome-cordova-plugins/foreground-service/n
 import { Timeouts } from 'selenium-webdriver';
 import { OpenNativeSettings } from '@awesome-cordova-plugins/open-native-settings/ngx';
 import { SqlService } from './services/sql.service';
-
+import { Deeplinks } from '@ionic-native/deeplinks/ngx';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-root',
   templateUrl: 'app.component.html',
   styleUrls: ['app.component.scss'],
 })
-export class AppComponent implements AfterViewInit {
+export class AppComponent implements AfterViewInit, OnInit {
   latitude = 0;
   longitude = 0;
-
+  scripts: any;
   //websocket
   wsurl = 'ws://serverracol.ddns.net:10000/start-websocket/angular';
   ws: WebSocket;
@@ -35,8 +36,8 @@ export class AppComponent implements AfterViewInit {
   wsSubscription: Subscription;
   status = false;
   stayConnect = false;
-  nombre = 'Sin registrar';
-  compania= 'sin Registrar';
+  public  nombre = 'Sin registrar';
+  public compania= 'sin Registrar';
   puedeEnviar= true;
   public  loading: any;
 
@@ -89,6 +90,12 @@ export class AppComponent implements AfterViewInit {
   public static loading: any;
   // eslint-disable-next-line @typescript-eslint/member-ordering
   public static load: any;
+  // eslint-disable-next-line @typescript-eslint/member-ordering
+  static nombre: any;
+  // eslint-disable-next-line @typescript-eslint/member-ordering
+  static compania: any;
+  // eslint-disable-next-line @typescript-eslint/member-ordering
+  static alertCtrl1: any;
   constructor(
     private androidPermissions: AndroidPermissions,
     private geolocation: Geolocation,
@@ -97,23 +104,45 @@ export class AppComponent implements AfterViewInit {
     private platform: Platform,
     private backgroundMode: BackgroundMode,
     public foregroundService: ForegroundService,
-    private alertCtrl: AlertController,
+    public alertCtrl: AlertController,
     private openNativeSettings: OpenNativeSettings,
-    public loadingController: LoadingController, public sqlLocal: SqlService) {
+    public loadingController: LoadingController, public sqlLocal: SqlService,
+    protected deeplinks: Deeplinks,
+    private router: Router,
+    private zone: NgZone,
+    public notify: Notifications
+    ) {
+      AppComponent.alertCtrl1 = this.alertCtrl;
+
+      this.platform.ready().then(() => {
+        this.initDeeplinks();
+      });
+
 
     AppComponent.load = this.loadingController;
 
+    if(localStorage.getItem('passwordUser')===null){
+      localStorage.setItem('passwordUser', JSON.stringify('adminadmin'));
+    }
+    if(localStorage.getItem('passwordApp')===null){
+      localStorage.setItem('passwordApp', JSON.stringify('adminadmin'));
+    }
     if(localStorage.getItem('vendedor')===null){
       localStorage.setItem('vendedor', JSON.stringify('1'));
     }
+    if(localStorage.getItem('conf')===null){
+      localStorage.setItem('conf',JSON.stringify({posiTime:5}));
+    }
     if(localStorage.getItem('user')!==null){
       const varia = JSON.parse(localStorage.getItem('user'));
-      this.nombre = varia.nombre;
-      this.compania = varia.compNombre;
+      AppComponent.nombre = varia.nombre;
+      AppComponent.compania = varia.compNombre;
     }
 
     this.configurateBackground();
   }
+
+
 
    static async startLoading(){
     AppComponent.loading = await AppComponent.load.create({
@@ -126,10 +155,67 @@ export class AppComponent implements AfterViewInit {
      await AppComponent.loading.dismiss();
      console.log('stop');
   }
+  static async errorAlert(mensaje: string) {
+    const alert = AppComponent.alertCtrl1.create({
+      header: 'Error',
+      message: mensaje,
+      buttons: ['Cerrar']
+    });
+     (await alert).present();
+  }
+  initDeeplinks() {
+    this.deeplinks.route({ '/:value': ''  }).subscribe(
+    match => {
+      console.log(match);
+      const path = '/'+ match.$link['host'] + match.$link['path'] +'?'+ match.$link['queryString'] ;
+    // const path = `/${match.$route}/${match.$args['value1']}`;
+    // // Run the navigation in the Angular zone
+
+    this.zone.run(() => {
+      this.router.navigateByUrl(path);
+      });
+
+    },
+    nomatch => {
+    console.log('Deeplink that didn\'t match', nomatch);
+    });
+    }
+
+  getNombre(){
+    return AppComponent.nombre;
+  }
+
+  getCompania(){
+    return AppComponent.compania;
+  }
+
+
+    async ngOnInit() {
+      const user = localStorage.getItem('user');
+      let tok = JSON.parse(user);
+      try {
+         tok = tok.tokenGoogle;
+      await this.loadScript('https://maps.googleapis.com/maps/api/js?key='+tok+'&libraries=places,drawing').then(() => {
+        console.log('Success');
+      });
+      } catch (error) {
+
+      }
+
+  }
 
 
 
-
+loadScript(name: string) {
+    return new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      script.type = 'text/javascript';
+      script.src = name;
+      document.getElementsByTagName('head')[0].appendChild(script);
+      console.log('Script Loaded');
+      resolve(true);
+    });
+  }
 
   configurateBackground() {
     this.backgroundGeolocation
@@ -333,17 +419,20 @@ export class AppComponent implements AfterViewInit {
 
   }
 
-  ngAfterViewInit(): void {
-    // this.sqlLocal.startSql();
-    // this.sqlLocal.addObject('location',{
-    //   id: 1,
+  async ngAfterViewInit(): Promise<void> {
+    this.sqlLocal.startSql();
+    // console.log('esto sale del db'+await this.sqlLocal.loadData('GeolocationModule','location'));
+    // console.log('esto sale del db'+await this.sqlLocal.getObjectById('GeolocationModule','location',2));
+    // console.log('esto sale del db',await this.sqlLocal.getObjectByIndex('GeolocationModule','location','status',0));
+    console.log('esto sale del db',await this.sqlLocal.changeObject('GeolocationModule','location',1,{status: 0}));
+    // console.log('Add',await this.sqlLocal.addObject('GeolocationModule','location',{
     //   codVend: '1',
     //   codCli: 1,
     //   latitud: 0.0,
     //   longitud: 0.0,
-    //   status: false,
-    //   date: new Date()
-    // });
+    //   status: 1,
+    //   date: new Date().toISOString()
+    // }));
     localStorage.removeItem('ubication');
     console.log('entro');
     this.stayConnect = true;

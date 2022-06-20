@@ -1,5 +1,5 @@
 import { NgModule } from '@angular/core';
-import { BrowserModule } from '@angular/platform-browser';
+import { BrowserModule, HammerModule  } from '@angular/platform-browser';
 import { RouteReuseStrategy } from '@angular/router';
 import { HttpClientModule } from '@angular/common/http';
 
@@ -22,7 +22,20 @@ import { ForegroundService } from '@awesome-cordova-plugins/foreground-service/n
 import { alertController } from '@ionic/core';
 import { Chart } from 'chart.js';
 import { OpenNativeSettings } from '@awesome-cordova-plugins/open-native-settings/ngx';
+import { Deeplinks } from '@ionic-native/deeplinks/ngx';
 
+import { HAMMER_GESTURE_CONFIG, HammerGestureConfig } from '@angular/platform-browser';
+import { AppVersion } from '@ionic-native/app-version/ngx';
+import {MatSnackBarModule} from '@angular/material/snack-bar';
+
+
+export class MyHammerConfig extends HammerGestureConfig {
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    overrides = <any> {
+        pinch: { enable: false },
+        rotate: { enable: false }
+    };
+}
 
 
 @NgModule({
@@ -32,10 +45,11 @@ import { OpenNativeSettings } from '@awesome-cordova-plugins/open-native-setting
     IonicModule.forRoot(),
     AppRoutingModule,
     HttpClientModule,
+    HammerModule ,
 
   ],
   providers: [
-
+    AppVersion,
     AlertController,
     ForegroundService,
     BackgroundMode,
@@ -47,7 +61,12 @@ import { OpenNativeSettings } from '@awesome-cordova-plugins/open-native-setting
     LocationAccuracy,
     NativeGeocoder,
     SQLite,
-    { provide: RouteReuseStrategy, useClass: IonicRouteStrategy }],
+    Deeplinks,
+    { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
+    {
+      provide: HAMMER_GESTURE_CONFIG,
+      useClass: MyHammerConfig
+  }],
   bootstrap: [AppComponent],
 })
 export class AppModule {}
