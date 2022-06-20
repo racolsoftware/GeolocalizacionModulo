@@ -109,8 +109,7 @@ export class AppComponent implements AfterViewInit, OnInit {
     public loadingController: LoadingController, public sqlLocal: SqlService,
     protected deeplinks: Deeplinks,
     private router: Router,
-    private zone: NgZone,
-    public notify: Notifications
+    private zone: NgZone
     ) {
       AppComponent.alertCtrl1 = this.alertCtrl;
 

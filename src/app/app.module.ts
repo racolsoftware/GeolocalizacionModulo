@@ -26,7 +26,7 @@ import { Deeplinks } from '@ionic-native/deeplinks/ngx';
 
 import { HAMMER_GESTURE_CONFIG, HammerGestureConfig } from '@angular/platform-browser';
 import { AppVersion } from '@ionic-native/app-version/ngx';
-import {MatSnackBarModule} from '@angular/material/snack-bar';
+
 
 
 export class MyHammerConfig extends HammerGestureConfig {
